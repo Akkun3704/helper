@@ -1,0 +1,2 @@
+
+kurang tw 
