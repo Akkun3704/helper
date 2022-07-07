@@ -20,6 +20,7 @@ app.get('/', (req, res) => {
 })
 
 app.post('/imagetopdf', async (req, res) => {
+  clearTmp()
   try {
     let { images, filename } = req.body
     if (!images) return res.json({ message: 'Required an image url' })
@@ -31,11 +32,6 @@ app.post('/imagetopdf', async (req, res) => {
   } catch (e) {
     res.json({ message: String(e) })
   }
-})
-
-app.use((req, res, next) => {
-  clearTmp()
-  next()
 })
 
 const listener = app.listen(process.env.PORT || ~~(Math.random() * 1e4), () => {
