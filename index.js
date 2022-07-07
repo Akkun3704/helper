@@ -20,7 +20,6 @@ app.get('/', (req, res) => {
 })
 
 app.post('/imagetopdf', async (req, res) => {
-  clearTmp()
   try {
     let { images, filename } = req.body
     if (!images) return res.json({ message: 'Required an image url' })
@@ -38,9 +37,9 @@ const listener = app.listen(process.env.PORT || ~~(Math.random() * 1e4), () => {
   console.log('App running on port', listener.address().port)
 })
 
-function delay(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms))
-}
+setInterval(() => {
+  clearTmp()
+}, 60 * 1000)
 
 function clearTmp() {
   let filename = []
