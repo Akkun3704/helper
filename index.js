@@ -15,11 +15,6 @@ app.use(morgan('tiny'))
 app.use(bodyParser.json())
 app.set('json spaces', 2)
 
-app.use((req, res, next) => {
-  clearTmp()
-  next()
-})
-
 app.get('/', (req, res) => {
   res.json({ message: 'still in development, i guess...' })
 })
@@ -36,6 +31,11 @@ app.post('/imagetopdf', async (req, res) => {
   } catch (e) {
     res.json({ message: String(e) })
   }
+})
+
+app.use((req, res, next) => {
+  clearTmp()
+  next()
 })
 
 const listener = app.listen(process.env.PORT || ~~(Math.random() * 1e4), () => {
