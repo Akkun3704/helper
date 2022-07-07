@@ -3,6 +3,7 @@ const jimp = require('jimp')
 const path = require('path')
 const axios = require('axios')
 const morgan = require('morgan')
+const cheerio = require('cheerio')
 const express = require('express')
 const FormData = require('form-data')
 const PDFDocument = require('pdfkit')
@@ -35,6 +36,30 @@ app.post('/imagetopdf', async (req, res) => {
     res.json(await uploadFile(path.join(tmpFolder, filename)))
   } catch (e) {
     res.json({ message: String(e) })
+  }
+})
+
+app.get('/fetch', async (req, res) => {
+  try {
+    if (!req.query.url) return res.redirect('/')
+    let json = await axios.get(req.query.url)
+    res.json(json.data)
+  } catch (e) {
+    res.end(e)
+  }
+})
+
+app.get('/buffer', async (req, res) => {
+  try {
+    if (!req.query.url) return res.redirect('/')
+    let data = await axios.get(req.query.url, { responseType: 'arraybuffer' })
+    res.writeHead(200, {
+      'Content-Type': data.headers['content-type'] || data.headers['Content-Type']
+      'Content-Length': data.data.length
+    })
+    res.end(data.data)
+  } catch (e) {
+    res.end(e)
   }
 })
 
@@ -77,9 +102,9 @@ async function toPDF(images, opt = {}) {
 
 async function uploadFile(path) {
   let form = new FormData
-  form.append('files[]', fs.createReadStream(path))
+  form.append('file', fs.createReadStream(path))
   let res = await axios({
-    url: 'https://uguu.se/upload.php',
+    url: 'https://api.anonfiles.com/upload',
     method: 'post',
     data: form,
     headers: {
@@ -89,6 +114,14 @@ async function uploadFile(path) {
     maxBodyLength: Infinity
   })
   // await fs.promises.unlink(path)
-  if (res.data.success) return res.data.files[0]
-  return res.data
+  if (res.data.success) {
+    let file = res.data.data.file, $ = cheerio.load(file.url.full)
+    return {
+      url: $('#download-url').atrr('href'),
+      shorturl: file.url.short,
+      name: file.metadata.name,
+      size: file.metadata.size.readable
+    }
+  }
+  return res
 }
