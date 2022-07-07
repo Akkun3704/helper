@@ -37,23 +37,6 @@ const listener = app.listen(process.env.PORT || ~~(Math.random() * 1e4), () => {
   console.log('App running on port', listener.address().port)
 })
 
-setInterval(() => {
-  clearTmp()
-}, 60 * 1000)
-
-function clearTmp() {
-  let filename = []
-  fs.readdirSync(tmpFolder).forEach(file => filename.push(path.join(tmpFolder, file)))
-  return filename.map(file => {
-    let stats = fs.statSync(file)
-    if (stats.isFile() && (Date.now() - stats.mtimeMs >= 1000 * 60 * 3)) {
-      console.log('Deleted file', file)
-      return fs.unlinkSync(file)
-    }
-    return false
-  })
-}
-
 async function toPDF(images, opt = {}) {
   return new Promise(async (resolve, reject) => {
     if (!Array.isArray(images)) images = [images]
