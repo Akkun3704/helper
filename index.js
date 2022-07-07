@@ -54,7 +54,7 @@ app.get('/buffer', async (req, res) => {
     if (!req.query.url) return res.redirect('/')
     let data = await axios.get(req.query.url, { responseType: 'arraybuffer' })
     res.writeHead(200, {
-      'Content-Type': data.headers['content-type'] || data.headers['Content-Type']
+      'Content-Type': data.headers['content-type'] || data.headers['Content-Type'],
       'Content-Length': data.data.length
     })
     res.end(data.data)
