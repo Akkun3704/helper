@@ -45,7 +45,7 @@ app.get('/fetch', async (req, res) => {
     let json = await axios.get(req.query.url)
     res.json(json.data)
   } catch (e) {
-    res.end(e)
+    res.send(e)
   }
 })
 
@@ -59,7 +59,7 @@ app.get('/buffer', async (req, res) => {
     })
     res.end(data.data)
   } catch (e) {
-    res.end(e)
+    res.send(e)
   }
 })
 
