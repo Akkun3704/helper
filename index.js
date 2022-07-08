@@ -114,16 +114,6 @@ async function uploadFile(path) {
     maxBodyLength: Infinity
   })
   // await fs.promises.unlink(path)
-  if (res.data.success) {
-    let file = res.data.data.file,
-      data = await axios.get(file.url.full),
-      $ = cheerio.load(data.data)
-    return {
-      url: $('#download-url').attr('href'),
-      shorturl: file.url.short,
-      name: file.metadata.name,
-      size: file.metadata.size.readable
-    }
-  }
+  if (res.data.success) return res.data.data.file
   return res
 }
