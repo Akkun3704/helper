@@ -119,7 +119,7 @@ async function uploadFile(path) {
       data = await axios.get(file.url.full),
       $ = cheerio.load(data.data)
     return {
-      url: $('#download-url').atrr('href'),
+      url: $('#download-url').attr('href'),
       shorturl: file.url.short,
       name: file.metadata.name,
       size: file.metadata.size.readable
