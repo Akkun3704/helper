@@ -115,7 +115,9 @@ async function uploadFile(path) {
   })
   // await fs.promises.unlink(path)
   if (res.data.success) {
-    let file = res.data.data.file, $ = cheerio.load(file.url.full)
+    let file = res.data.data.file,
+      data = await axios.get(file.url.full),
+      $ = cheerio.load(data.data)
     return {
       url: $('#download-url').atrr('href'),
       shorturl: file.url.short,
