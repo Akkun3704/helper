@@ -33,7 +33,7 @@ app.post('/imagetopdf', async (req, res) => {
     let buffer = await toPDF(images)
     console.log(images.length, filename)
     await fs.writeFileSync(path.join(tmpFolder, filename), buffer)
-    res.json(await uploadFile(path.join(tmpFolder, filename)))
+    res.download(path.join(tmpFolder, filename), filename)
   } catch (e) {
     res.json({ message: String(e) })
   }
