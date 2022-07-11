@@ -12,9 +12,10 @@ const bodyParser = require('body-parser')
 const tmpFolder = path.join(__dirname, './tmp')
 const app = express()
 
+app.set('json spaces', 2)
 app.use(morgan('tiny'))
 app.use(bodyParser.json())
-app.set('json spaces', 2)
+app.use(bodyParser.urlencoded({ extended: false }))
 
 app.use((req, res, next) => {
   clearTmp()
@@ -27,6 +28,7 @@ app.get('/', (req, res) => {
 
 app.post('/imagetopdf', async (req, res) => {
   try {
+    console.log(req.body)
     let { images, filename } = req.body
     if (!images) return res.json({ message: 'Required an image url' })
     if (!(filename && filename.endsWith('pdf'))) filename = `${~~(Math.random() * 1e9)}.pdf`
