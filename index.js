@@ -15,7 +15,7 @@ const app = express()
 app.set('json spaces', 2)
 app.use(morgan('tiny'))
 app.use(bodyParser.json())
-app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.urlencoded({ extended: true }))
 
 app.use((req, res, next) => {
   clearTmp()
