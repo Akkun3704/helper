@@ -35,7 +35,19 @@ app.post('/imagetopdf', async (req, res) => {
     let buffer = await toPDF(images)
     console.log(images.length, filename)
     await fs.writeFileSync(path.join(tmpFolder, filename), buffer)
-    res.download(path.join(tmpFolder, filename), filename)
+    let readStream = fs.createReadStream(path.join(tmpFolder, filename))
+    
+    readStream.on('close', () => {
+      res.end()
+    })
+    
+    res.set({
+      'Content-Disposition': `attachment; filename=${filename}`,
+      'Content-Type': 'application/pdf',
+      'Content-Length': buffer.length
+    })
+    
+    readStream.pipe(res)
   } catch (e) {
     res.json({ message: String(e) })
   }
