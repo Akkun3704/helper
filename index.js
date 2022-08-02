@@ -31,23 +31,15 @@ app.post('/imagetopdf', async (req, res) => {
     console.log(req.body)
     let { images, filename } = req.body
     if (!images) return res.json({ message: 'Required an image url' })
-    if (!(filename && filename.endsWith('pdf'))) filename = `${~~(Math.random() * 1e9)}.pdf`
+    if (!(filename && filename.endsWith('.pdf'))) filename = `${~~(Math.random() * 1e9)}.pdf`
     let buffer = await toPDF(images)
     console.log(images.length, filename)
-    await fs.writeFileSync(path.join(tmpFolder, filename), buffer)
-    let readStream = fs.createReadStream(path.join(tmpFolder, filename))
-    
-    readStream.on('close', () => {
-      res.end()
-    })
-    
     res.set({
       'Content-Disposition': `attachment; filename=${filename}`,
       'Content-Type': 'application/pdf',
       'Content-Length': buffer.length
     })
-    
-    readStream.pipe(res)
+    res.end(buffer)
   } catch (e) {
     res.json({ message: String(e) })
   }
@@ -67,7 +59,7 @@ app.get('/buffer', async (req, res) => {
   try {
     if (!req.query.url) return res.redirect('/')
     let data = await axios.get(req.query.url, { responseType: 'arraybuffer' })
-    res.writeHead(200, {
+    res.set({
       'Content-Type': data.headers['content-type'] || data.headers['Content-Type'],
       'Content-Length': data.data.length
     })
