@@ -19,7 +19,7 @@ app.use((req, res, next) => {
 	clearTmp()
 	setTimeout(() => {
 		next()
-	}, 120000)
+	}, 30 * 1000)
 })
 
 app.get('/', (req, res) => {
