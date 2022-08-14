@@ -17,9 +17,7 @@ app.use(express.json())
 
 app.use((req, res, next) => {
 	clearTmp()
-	setTimeout(() => {
-		next()
-	}, 5 * 1000)
+	next()
 })
 
 app.get('/', (req, res) => {
@@ -110,7 +108,7 @@ app.get('/nhentai/:code', async (req, res) => {
 			pages.push(`https://external-content.duckduckgo.com/iu/?u=https://i7.nhentai.net/galleries/${data.media_id}/${i + 1}.${ext}`)
 		})
 		let buffer = await toPDF(pages)
-		await sleep(10000)
+		await sleep(5000)
 		res.set({
 			'Content-Disposition': `attachment; filename=${data.id}.pdf`,
 			'Content-Type': 'application/pdf',
