@@ -46,12 +46,8 @@ app.post('/imagetopdf', async (req, res) => {
 		if (!(filename && filename.endsWith('.pdf'))) filename = `${~~(Math.random() * 1e9)}.pdf`
 		let buffer = await toPDF(images)
 		console.log(images.length, filename)
-		res.set({
-			'Content-Disposition': `attachment; filename=${filename}`,
-			'Content-Type': 'application/pdf',
-			'Content-Length': buffer.length
-		})
-		res.end(buffer)
+		fs.writeFileSync(path.join(tmpFolder, filename), buffer)
+		res.json({ result: `${req.protocol}://${req.get('host')}/download/${filename}` })
 	} catch (e) {
 		res.json({ message: String(e) })
 	}
@@ -109,13 +105,13 @@ app.get('/nhentai/:code', async (req, res) => {
 		})
 		let buffer = await toPDF(pages), filename = `${data.id}.pdf`
 		fs.writeFileSync(path.join(tmpFolder, filename), buffer)
-		res.json({ result: `${req.protocol}://${req.get('host')}/nhentai/download/${filename}` })
+		res.json({ result: `${req.protocol}://${req.get('host')}/download/${filename}` })
 	} catch (e) {
 		res.json({ message: String(e) })
 	}
 })
 
-app.get('/nhentai/download/:path', async (req, res) => {
+app.get('/download/:path', async (req, res) => {
 	try {
 		let filename = req.params.path
 		res.download(path.join(tmpFolder, filename), filename)
