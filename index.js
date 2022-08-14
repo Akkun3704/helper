@@ -17,7 +17,9 @@ app.use(express.json())
 
 app.use((req, res, next) => {
 	clearTmp()
-	next()
+	setTimeout(() => {
+		next()
+	}, 120000)
 })
 
 app.get('/', (req, res) => {
