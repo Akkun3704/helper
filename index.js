@@ -107,14 +107,18 @@ app.get('/nhentai/:code', async (req, res) => {
 			let ext = new URL(v.t).pathname.split('.')[1]
 			pages.push(`https://external-content.duckduckgo.com/iu/?u=https://i7.nhentai.net/galleries/${data.media_id}/${i + 1}.${ext}`)
 		})
-		let buffer = await toPDF(pages)
-		await sleep(5000)
-		res.set({
-			'Content-Disposition': `attachment; filename=${data.id}.pdf`,
-			'Content-Type': 'application/pdf',
-			'Content-Length': buffer.length
-		})
-		res.end(buffer)
+		let buffer = await toPDF(pages), filename = `${data.id}.pdf`
+		fs.writeFileSync(path.join(tmpFolder, filename), buffer)
+		res.json({ result: `${req.protocol}://${req.get('host')}/nhentai/download/${filename}` })
+	} catch (e) {
+		res.json({ message: String(e) })
+	}
+})
+
+app.get('/nhentai/download/:path', async (req, res) => {
+	try {
+		let filename = req.params.path
+		res.download(path.join(tmpFolder, filename), filename)
 	} catch (e) {
 		res.json({ message: String(e) })
 	}
