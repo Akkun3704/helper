@@ -145,24 +145,16 @@ function clearTmp() {
 	})
 }
 
-function toPDF(images, opt = {}) {
-	return new Promise(async (resolve, reject) => {
-		if (!Array.isArray(images)) images = [images]
-		let buffs = [], doc = new PDFDocument({ autoFirstPage: false })
-		for (let image of images) {
-			// let data = Buffer.isBuffer(image) ? image : (await axios.get(image, { responseType: 'arraybuffer', ...opt })).data
-			let data = (await axios.get(image, { responseType: 'arraybuffer', ...opt })).data
-			let { width, height } = (await jimp.read(data)).bitmap
-			doc.addPage({ size: [width, height] })
-			doc.image(data, 0, 0)
-			// doc.image(data, 0, 0, { align: 'center', valign: 'center' })
-			// doc.addPage({ size: [width, height] })
-		}
-		doc.on('data', (chunk) => buffs.push(chunk))
-		doc.on('end', () => resolve(Buffer.concat(buffs)))
-		doc.on('error', (err) => reject(err))
-		doc.end()
-	})
+async function toPDF(images, opt = {}) {
+	if (!Array.isArray(images)) images = [images]
+	let doc = new PDFDocument({ margin: 0, size: 'A4' })
+	for (let x = 0; x < images.length; x++) {
+		let data = (await axios.get(images[x], { responseType: 'arraybuffer', ...opt })).data
+		doc.image(data, 0, 0, { fit: [595.28, 841.89], align: 'center', valign: 'center' })
+		if (images.length != x + 1) doc.addPage()
+	}
+	doc.end()
+	return doc
 }
 
 async function nhentaiScraper(id) {
