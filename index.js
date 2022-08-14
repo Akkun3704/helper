@@ -108,6 +108,7 @@ app.get('/nhentai/:code', async (req, res) => {
 			pages.push(`https://external-content.duckduckgo.com/iu/?u=https://i7.nhentai.net/galleries/${data.media_id}/${i + 1}.${ext}`)
 		})
 		let buffer = await toPDF(pages)
+		await sleep(10000)
 		res.set({
 			'Content-Disposition': `attachment; filename=${data.id}.pdf`,
 			'Content-Type': 'application/pdf',
@@ -122,6 +123,10 @@ app.get('/nhentai/:code', async (req, res) => {
 const listener = app.listen(process.env.PORT || ~~(Math.random() * 1e4), () => {
 	console.log('App running on port', listener.address().port)
 })
+
+function sleep(ms) {
+	return new Promise(resolve => setTimeout(resolve, ms))
+}
 
 function clearTmp() {
 	let filename = []
