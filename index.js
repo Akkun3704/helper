@@ -1,5 +1,4 @@
 const fs = require('fs')
-const jimp = require('jimp')
 const path = require('path')
 const axios = require('axios')
 const morgan = require('morgan')
@@ -80,16 +79,16 @@ app.get('/buffer', async (req, res) => {
 app.get('/nhentai', async (req, res) => {
 	try {
 		if (req.query.code) {
-			let data = await nhentaiScraper(req.query.code)
-			if (!data) return res.json({ message: 'Code not exists' })
-			res.json({ result: data })
+			let result = await nhentaiScraper(req.query.code)
+			if (!result) return res.json({ message: 'Code not exists' })
+			res.json({ result })
 		}
-		let data = (await nhentaiScraper()).all, arr = []
-		for (let x of data) arr.push({
+		let data = (await nhentaiScraper()).all, result = []
+		for (let x of data) result.push({
 			id: x.id, title: x.title, pages: x?.num_pages || '',
 			cover: x.cover?.t?.replace(/a.kontol|b.kontol/, 'c.kontol') || x.cover?.replace(/a.kontol|b.kontol/, 'c.kontol')
 		})
-		res.json({ result: arr })
+		res.json({ result })
 	} catch (e) {
 		res.send(e)
 	}
