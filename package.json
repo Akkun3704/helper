@@ -9,12 +9,9 @@
   },
   "dependencies": {
     "axios": "^0.27.2",
-    "body-parser": "^1.20.0",
     "cheerio": "^1.0.0-rc.12",
     "express": "^4.18.1",
-    "form-data": "^4.0.0",
     "fs": "^0.0.1-security",
-    "jimp": "^0.16.1",
     "morgan": "^1.10.0",
     "pdfkit": "^0.13.0"
   }
