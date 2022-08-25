@@ -15,12 +15,12 @@ app.use(express.json())
 // app.use(express.urlencoded({ extended: true }))
 
 app.use((req, res, next) => {
-	// clearTmp()
+	clearTmp()
 	next()
 })
 
 app.get('/', (req, res) => {
-	let baseUrl = `${req.protocol}://${req.get('host')}`
+	let baseUrl = `https://${req.get('host')}`
 	res.json({
 		runtime: new Date(process.uptime() * 1000).toTimeString().split(' ')[0],
 		result: {
@@ -46,7 +46,7 @@ app.post('/imagetopdf', async (req, res) => {
 		let buffer = await toPDF(images)
 		console.log(images.length, filename)
 		fs.writeFileSync(path.join(tmpFolder, filename), buffer)
-		res.json({ result: `${req.protocol}://${req.get('host')}/download/${filename}` })
+		res.json({ result: `https://${req.get('host')}/download/${filename}` })
 	} catch (e) {
 		res.json({ message: String(e) })
 	}
@@ -104,7 +104,7 @@ app.get('/nhentai/:code', async (req, res) => {
 		})
 		let buffer = await toPDF(pages), filename = `${data.id}.pdf`
 		fs.writeFileSync(path.join(tmpFolder, filename), buffer)
-		res.json({ result: `${req.protocol}://${req.get('host')}/download/${filename}` })
+		res.json({ result: `https://${req.get('host')}/download/${filename}` })
 	} catch (e) {
 		res.json({ message: String(e) })
 	}
