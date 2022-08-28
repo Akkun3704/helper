@@ -7,6 +7,7 @@ const express = require('express')
 const PDFDocument = require('pdfkit')
 
 const tmpFolder = path.join(__dirname, './tmp')
+const PORT = process.env.PORT || ~~(Math.random() * 1e4)
 const app = express()
 
 app.set('json spaces', 2)
@@ -119,8 +120,8 @@ app.get('/download/:path', async (req, res) => {
 	}
 })
 
-const listener = app.listen(process.env.PORT || ~~(Math.random() * 1e4), () => {
-	console.log('App running on port', listener.address().port)
+app.listen(PORT, () => {
+	console.log('App running on port', PORT)
 })
 
 function sleep(ms) {
