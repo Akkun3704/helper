@@ -78,7 +78,7 @@ app.get('/buffer', async (req, res) => {
 })
 
 app.get('/nhentai', async (req, res) => {
-	try {
+	// try {
 		if (req.query.code) {
 			let result = await nhentaiScraper(req.query.code)
 			if (!result) return res.json({ message: 'Code not exists' })
@@ -90,9 +90,9 @@ app.get('/nhentai', async (req, res) => {
 			cover: x.cover?.t?.replace(/a.kontol|b.kontol/, 'c.kontol') || x.cover?.replace(/a.kontol|b.kontol/, 'c.kontol')
 		})
 		res.json({ result })
-	} catch (e) {
-		res.send(e)
-	}
+	// } catch (e) {
+	// 	res.send(e)
+	// }
 })
 
 app.get('/nhentai/:code', async (req, res) => {
