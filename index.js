@@ -111,21 +111,22 @@ app.get('/nhentai/:code', async (req, res) => {
 	}
 })
 
-app.get('/doujindesu', async (req, res) => {
+app.get('/doujindesu/:type', async (req, res) => {
 	try {
-		if (/^search$/i.test(req?.path)) {
+		if (/^latest$/i.test(req.params.type)) {
+			let result = await doujindesuScraper()
+			return res.json({ result })
+		} else if (/^search$/i.test(req.params.type)) {
 			if (!req.query.q) return res.json({ message: 'Input parameter q' })
 			let result = await doujindesuScraper('search', req.query.q)
 			return res.json({ result })
-		} else if (/^download$/i.test(req?.path)) {
+		} else if (/^download$/i.test(req.params.type)) {
 			if (!req.query.url) return res.json({ message: 'Required doujindesu url' })
 			let data = await doujindesuScraper('download', req.query.url)
 			let buffer = await toPDF(data.pages), filename = `${encodeURIComponent(data.title)}.pdf`
 			fs.writeFileSync(path.join(tmpFolder, filename), buffer)
 			return res.json({ result: `https://${req.get('host')}/download/${filename}` })
 		}
-		let result = await doujindesuScraper()
-		res.json({ result })
 	} catch (e) {
 		res.send(e)
 	}
