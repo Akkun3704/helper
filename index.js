@@ -28,7 +28,7 @@ app.get('/', (req, res) => {
 			doujindesu: {
 				latest: `${baseUrl}/doujindesu/latest`,
 				search: `${baseUrl}/doujindesu/search?q=school`,
-				download: `${baseUrl}/doujindesu/download?url=https://doujindesu.xxx/2022/09/02/romantic-camping-chapter-12/`
+				download: `${baseUrl}/doujindesu/download?url=https://212.32.226.234/2022/09/02/illicit-love-chapter-34`
 			},
 			nhentai: {
 				latest: `${baseUrl}/nhentai`,
