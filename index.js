@@ -111,6 +111,26 @@ app.get('/nhentai/:code', async (req, res) => {
 	}
 })
 
+app.get('/doujindesu', async (req, res) => {
+	try {
+		if (/^search$/i.test(req?.path)) {
+			if (!req.query.q) return res.json({ message: 'Input parameter q' })
+			let result = await doujindesuScraper('search', req.query.q)
+			return res.json({ result })
+		} else if (/^download$/i.test(req?.path)) {
+			if (!req.query.url) return res.json({ message: 'Required doujindesu url' })
+			let data = await doujindesuScraper('download', req.query.url)
+			let buffer = await toPDF(data.pages), filename = `${encodeURIComponent(data.title)}.pdf`
+			fs.writeFileSync(path.join(tmpFolder, filename), buffer)
+			return res.json({ result: `https://${req.get('host')}/download/${filename}` })
+		}
+		let result = await doujindesuScraper()
+		res.json({ result })
+	} catch (e) {
+		res.send(e)
+	}
+})
+
 app.get('/download/:path', async (req, res) => {
 	try {
 		let filename = req.params.path
@@ -161,4 +181,42 @@ async function nhentaiScraper(id) {
 	let uri = id ? `https://cin.guru/v/${+id}/` : 'https://cin.guru/'
 	let html = (await axios.get(uri)).data
 	return JSON.parse(html.split('<script id="__NEXT_DATA__" type="application/json">')[1].split('</script>')[0]).props.pageProps.data
+}
+
+async function doujindesuScrapper(type = 'latest', query) {
+	let uri = /^latest$/i.test(type) ? 'https://212.32.226.234/' : /^search$/i.test(type) ? `https://212.32.226.234/?s=${query}` : query
+	if (/^latest$/i.test(type)) {
+		let html = (await axios.get(uri)).data
+		let $ = cheerio.load(html), arr = []
+		$('div.animposx').each((idx, el) => arr.push({
+			title: $(el).find('a').attr('alt'),
+			chapter: $(el).find('div.plyepisode').find('a').text().trim(),
+			type: $(el).find('div.type').text(),
+			score: $(el).find('div.score').text().trim(),
+			cover: $(el).find('img').attr('src'),
+			url: $(el).find('div.plyepisode').find('a').attr('href')
+		}))
+		return arr
+	} else if (/^search$/i.test(type)) {
+		let html = (await axios.get(uri)).data
+		let $ = cheerio.load(html), arr = []
+		$('div.animposx').each((idx, el) => arr.push({
+			title: $(el).find('div.title').text().trim(),
+			type: $(el).find('div.type').text().replace(/Publishing|Finished/i, ''),
+			status: $(el).find('div.type').text().replace(/Manhwa|Manga|Doujinshi/i, ''),
+			score: $(el).find('div.score').text().trim(),
+			cover: $(el).find('img').attr('src'),
+			url: $(el).find('a').attr('href')
+		}))
+		return arr
+	} else if (/^download$/i.test(type)) {
+		let html = (await axios.get(uri)).data
+		let $ = cheerio.load(html)
+		return {
+			title: $('div.lm').find('h1').text(),
+			pages: Object.entries($('div.reader-area').find('img')).map(v => v[1]?.attribs?.['src']).filter(v => v)
+		}
+	} else {
+		throw 'Type not supported'
+	}
 }
