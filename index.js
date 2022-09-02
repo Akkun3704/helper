@@ -25,6 +25,11 @@ app.get('/', (req, res) => {
 	res.json({
 		runtime: new Date(process.uptime() * 1000).toTimeString().split(' ')[0],
 		result: {
+			doujindesu: {
+				latest: `${baseUrl}/doujindesu/latest`,
+				search: `${baseUrl}/doujindesu/search?q=school`,
+				download: `${baseUrl}/doujindesu/download?url=https://doujindesu.xxx/2022/09/02/romantic-camping-chapter-12/`
+			},
 			nhentai: {
 				latest: `${baseUrl}/nhentai`,
 				detail: `${baseUrl}/nhentai?code=353331`,
@@ -184,7 +189,7 @@ async function nhentaiScraper(id) {
 	return JSON.parse(html.split('<script id="__NEXT_DATA__" type="application/json">')[1].split('</script>')[0]).props.pageProps.data
 }
 
-async function doujindesuScrapper(type = 'latest', query) {
+async function doujindesuScraper(type = 'latest', query) {
 	let uri = /^latest$/i.test(type) ? 'https://212.32.226.234/' : /^search$/i.test(type) ? `https://212.32.226.234/?s=${query}` : query
 	if (/^latest$/i.test(type)) {
 		let html = (await axios.get(uri)).data
