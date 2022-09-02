@@ -128,7 +128,7 @@ app.get('/doujindesu/:type', async (req, res) => {
 		} else if (/^download$/i.test(req.params.type)) {
 			if (!req.query.url) return res.json({ message: 'Required doujindesu url' })
 			let data = await doujindesuScraper('download', req.query.url)
-			let buffer = await toPDF(data.pages), filename = `${data.title}.pdf`
+			let buffer = await toPDF(data.pages), filename = `${encodeURIComponent(data.title)}.pdf`
 			fs.writeFileSync(path.join(tmpFolder, filename), buffer)
 			return res.json({ result: `https://${req.get('host')}/download/${filename}` })
 		}
@@ -140,7 +140,7 @@ app.get('/doujindesu/:type', async (req, res) => {
 app.get('/download/:path', async (req, res) => {
 	try {
 		let filename = req.params.path
-		res.download(path.join(tmpFolder, filename), filename)
+		res.download(path.join(tmpFolder, encodeURIComponent(filename)), filename)
 	} catch (e) {
 		res.json({ message: String(e) })
 	}
