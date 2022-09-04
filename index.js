@@ -37,7 +37,8 @@ app.get('/', (req, res) => {
 			},
 			tools: {
 				buffer: `${baseUrl}/buffer?url=https://i.waifu.pics/dQ8bv0m.png`,
-				fetch: `${baseUrl}/fetch?url=${baseUrl}`
+				fetch: `${baseUrl}/fetch?url=${baseUrl}`,
+				ssweb: `${baseUrl}/ss?url=${baseUrl}&full=false&type=desktop`
 			}
 		}
 	})
@@ -77,6 +78,17 @@ app.get('/buffer', async (req, res) => {
 			'Content-Length': data.data.length
 		})
 		res.end(data.data)
+	} catch (e) {
+		res.send(e)
+	}
+})
+
+app.get(['/ss', '/ssweb'], async (req, res) => {
+	try {
+		let { url, full, type } = req.query
+		if (!url) return res.json({ message: 'Required an url' })
+		let data = await ssweb(url, full, type)
+		res.end(data)
 	} catch (e) {
 		res.send(e)
 	}
@@ -181,6 +193,24 @@ function toPDF(images, opt = {}) {
 		doc.on('error', (err) => reject(err))
 		doc.end()
 	})
+}
+
+async function ssweb(url, full = false, type = 'desktop') {
+	type = type.toLowerCase()
+	if (!/desktop|tablet|phone/.test(type)) type = 'desktop'
+	let form = new URLSearchParams
+	form.append('url', url)
+	form.append('device', type)
+	if (!!full) form.append('full', 'on')
+	form.append('cacheLimit', 0)
+	let res = await axios.post('https://www.screenshotmachine.com/capture.php', form)
+	let buffer = await axios.get(`https://www.screenshotmachine.com/${res.data.link}`, {
+		responseType: 'arraybuffer',
+		headers: {
+			'cookie': res.headers['set-cookie'].join('')
+		}
+	})
+	return Buffer.from(buffer.data)
 }
 
 async function nhentaiScraper(id) {
