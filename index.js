@@ -28,7 +28,7 @@ app.get('/', (req, res) => {
 			doujindesu: {
 				latest: `${baseUrl}/doujindesu/latest`,
 				search: `${baseUrl}/doujindesu/search?q=school`,
-				download: `${baseUrl}/doujindesu/download?url=https://212.32.226.234/2022/09/02/illicit-love-chapter-34`
+				detail: `${baseUrl}/doujindesu/detail?url=https://212.32.226.234/manga/illicit-love`
 			},
 			nhentai: {
 				latest: `${baseUrl}/nhentai`,
@@ -143,6 +143,10 @@ app.get('/doujindesu/:type', async (req, res) => {
 			let buffer = await toPDF(data.pages), filename = `${encodeURIComponent(data.title)}.pdf`
 			fs.writeFileSync(path.join(tmpFolder, filename), buffer)
 			return res.json({ result: `https://${req.get('host')}/download/${filename}` })
+		} else if (/^detail$/i.test(req.params.type)) {
+			if (!req.query.url) return res.json({ message: 'Required doujindesu url' })
+			let result = await doujindesuScraper('detail', req.query.url)
+			return res.json({ result })
 		}
 	} catch (e) {
 		res.send(e)
@@ -222,8 +226,7 @@ async function nhentaiScraper(id) {
 async function doujindesuScraper(type = 'latest', query) {
 	let uri = /^latest$/i.test(type) ? 'https://212.32.226.234/' : /^search$/i.test(type) ? `https://212.32.226.234/?s=${query}` : query
 	if (/^latest$/i.test(type)) {
-		let html = (await axios.get(uri)).data
-		let $ = cheerio.load(html), arr = []
+		let html = (await axios.get(uri)).data, $ = cheerio.load(html), arr = []
 		$('div.animposx').each((idx, el) => arr.push({
 			title: $(el).find('a').attr('alt'),
 			chapter: $(el).find('div.plyepisode').find('a').text().trim(),
@@ -234,8 +237,7 @@ async function doujindesuScraper(type = 'latest', query) {
 		}))
 		return arr
 	} else if (/^search$/i.test(type)) {
-		let html = (await axios.get(uri)).data
-		let $ = cheerio.load(html), arr = []
+		let html = (await axios.get(uri)).data, $ = cheerio.load(html), arr = []
 		$('div.animposx').each((idx, el) => arr.push({
 			title: $(el).find('div.title').text().trim(),
 			type: $(el).find('div.type').text().replace(/Publishing|Finished/i, ''),
@@ -246,12 +248,29 @@ async function doujindesuScraper(type = 'latest', query) {
 		}))
 		return arr
 	} else if (/^download$/i.test(type)) {
-		let html = (await axios.get(uri)).data
-		let $ = cheerio.load(html)
+		let html = (await axios.get(uri)).data, $ = cheerio.load(html)
 		return {
 			title: $('div.lm').find('h1').text(),
 			pages: Object.entries($('div.reader-area').find('img')).map(v => v[1]?.attribs?.['src']).filter(v => v)
 		}
+	} else if (/^detail$/i.test(type)) {
+		let html = (await axios(uri)).data, $ = cheerio.load(html), obj = {}
+		obj.title = $('div.thumb').find('img').attr('alt')
+		obj.cover = $('div.thumb').find('img').attr('src')
+		$('div.spe > span').each((idx, el) => {
+			let str = $(el).find('b').text()
+			obj[str.toLowerCase().split(':')[0]] = $(el).text().replace(str, '').trim()
+		})
+		obj.genre = $('div.genre-info > a').get().map((v) => $(v).text()).join(', ')
+		obj.sinopsis = $('div.entry-content > p').get().map((v) => $(v).text()).slice(0, -1).join('\n\n').replace('Sinopsis:', '').trim()
+		obj.chapter_list = {}
+		$('#chapter_list > ul > li').each((idx, el) => obj.chapter_list['chapter_' + $(el).find('div.epsright').text().replace(/\D/g, '')] = {
+			title: $(el).find('div.epsleft > span > a').text(),
+			date: $(el).find('div.epsleft > span.date').text(),
+			url: $(el).find('a').attr('href'),
+			download: $(el).find('div.chright > span > a').attr('href')
+		})
+		return obj
 	} else {
 		throw 'Type not supported'
 	}
