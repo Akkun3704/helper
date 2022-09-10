@@ -97,14 +97,21 @@ app.get(['/ss', '/ssweb'], async (req, res) => {
 app.get('/nhentai', async (req, res) => {
 	try {
 		if (req.query.code) {
-			let result = await nhentaiScraper(req.query.code)
-			if (!result) return res.json({ message: 'Code not exists' })
-			return res.json({ result })
+			let data = await nhentaiScraper(req.query.code)
+			if (!data) return res.json({ message: 'Code not exists' })
+			let img = data.images, images = {}
+			delete data.images
+			images.cover = images.thumbnail = `https://external-content.duckduckgo.com/iu/?u=https://t.nhentai.net/galleries/${data.media_id}/thumb.jpg`, images.pages = []
+			img.pages.map((v, i) => {
+				let ext = new URL(v.t).pathname.split('.')[1]
+				images.pages.push(`https://external-content.duckduckgo.com/iu/?u=https://i.nhentai.net/galleries/${data.media_id}/${i + 1}.${ext}`)
+			})
+			return res.json({ result: { ...data, ...images }})
 		}
 		let data = (await nhentaiScraper()).all, result = []
 		for (let x of data) result.push({
 			id: x.id, title: x.title, pages: x?.num_pages || '',
-			cover: x.cover?.t?.replace(/a.kontol|b.kontol/, 'c.kontol') || x.cover?.replace(/a.kontol|b.kontol/, 'c.kontol')
+			cover: x.cover?.t?.replace(/a.|b./, 'c.') || x.cover?.replace(/a.|b./, 'c.')
 		})
 		res.json({ result })
 	} catch (e) {
