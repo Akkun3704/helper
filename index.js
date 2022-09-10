@@ -106,7 +106,7 @@ app.get('/nhentai', async (req, res) => {
 				let ext = new URL(v.t).pathname.split('.')[1]
 				images.pages.push(`https://external-content.duckduckgo.com/iu/?u=https://i.nhentai.net/galleries/${data.media_id}/${i + 1}.${ext}`)
 			})
-			return res.json({ result: { ...data, ...images }})
+			return res.json({ result: { ...data, images }})
 		}
 		let data = (await nhentaiScraper()).all, result = []
 		for (let x of data) result.push({
