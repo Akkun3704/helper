@@ -152,7 +152,7 @@ app.get('/doujindesu/:type', async (req, res) => {
 			return res.json({ result: `https://${req.get('host')}/download/${filename}` })
 		} else if (/^detail$/i.test(req.params.type)) {
 			if (!req.query.url) return res.json({ message: 'Required doujindesu url' })
-			let result = await doujindesuScraper('detail', req.query.url)
+			let result = await doujindesuScraper('detail', req.query.url.endsWith('/') ? req.query.url : req.query.url + '/')
 			return res.json({ result })
 		}
 	} catch (e) {
