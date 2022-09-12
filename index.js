@@ -28,7 +28,7 @@ app.get('/', (req, res) => {
 			doujindesu: {
 				latest: `${baseUrl}/doujindesu/latest`,
 				search: `${baseUrl}/doujindesu/search?q=school`,
-				detail: `${baseUrl}/doujindesu/detail?url=https://212.32.226.234/manga/illicit-love`
+				detail: `${baseUrl}/doujindesu/detail?url=https://212.32.226.234/manga/a-wonderful-new-world`
 			},
 			nhentai: {
 				latest: `${baseUrl}/nhentai`,
