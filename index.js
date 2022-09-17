@@ -208,7 +208,7 @@ async function toPDF(images, opt = {}) {
 	let doc = new PDFDocument({ autoFirstPage: false })
 	for (let image of images) {
 		if (/.gif|.webp/.test(image)) continue 
-		let data = (await axios.get(images[x], { responseType: 'arraybuffer', ...opt })).data
+		let data = (await axios.get(image, { responseType: 'arraybuffer', ...opt })).data
 		let img = doc.openImage(data)
 		doc.addPage({ size: [img.width, img.height] })
 		doc.image(img, 0, 0)
