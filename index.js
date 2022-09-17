@@ -2,9 +2,11 @@ const fs = require('fs')
 const path = require('path')
 const axios = require('axios')
 const morgan = require('morgan')
+const fakeua = require('fake-ua')
 const cheerio = require('cheerio')
 const express = require('express')
 const PDFDocument = require('pdfkit')
+const getStream = require('get-stream')
 
 const tmpFolder = path.join(__dirname, './tmp')
 const PORT = process.env.PORT || ~~(Math.random() * 1e4)
@@ -89,6 +91,16 @@ app.get(['/ss', '/ssweb'], async (req, res) => {
 		if (!url) return res.json({ message: 'Required an url' })
 		let data = await ssweb(url, full, type)
 		res.end(data)
+	} catch (e) {
+		res.send(e)
+	}
+})
+
+app.get('/igstalk', async (req, res) => {
+	try {
+		if (!req.query.user) return res.json({ message: 'Required an username' })
+		let result = await igStalk(req.query.user)
+		res.json({ result })
 	} catch (e) {
 		res.send(e)
 	}
@@ -222,6 +234,32 @@ async function ssweb(url, full = false, type = 'desktop') {
 		}
 	})
 	return Buffer.from(buffer.data)
+}
+
+async function igStalk(user) {
+	const getDetailPost = async url => {
+		let html = (await axios.get(url, { headers: { 'Referer': 'https://www.picuki.com/', 'User-Agent': fakeua.mobile() }})).data 
+		let $ = cheerio.load(html), obj = {}
+		obj.caption = $('title').text().trim().split(' Instagram post ')[1].split(' - Picuki.com')[0]
+		obj.ago = $('div.single-photo-info').find('div.single-photo-time').text()
+		obj.likes = $('div.info-bottom').find('span.icon-thumbs-up-alt').text()
+		obj.comments = $('div.info-bottom').find('span.icon-chat').text()
+		obj.url = $('div.single-photo.owl-carousel.owl-theme > div.item').get().map((x) => $(x).find('img').attr('src') || $(x).find('video').attr('src'))
+		if (!obj.url.length) obj.url = [$('div.single-photo').find('img').attr('src') || $('div.single-photo').find('video').attr('src')]
+		return obj
+	}
+	let html = (await axios.get('https://www.picuki.com/profile/' + user, { headers: { 'Referer': 'https://www.picuki.com/', 'User-Agent': fakeua.mobile() }})).data
+	let $ = cheerio.load(html), obj = {}, arr = []
+	let urlPost = $('div.content > ul > li').get().map((x) => $(x).find('a').attr('href'))
+	for (let x of urlPost) arr.push(await getDetailPost(x))
+	obj.avatar = $('div.profile-avatar').find('a').attr('href')
+	obj.username = $('div.profile-name > h1').text()
+	obj.fullname = $('div.profile-name > h2').text()
+	obj.description = $('div.profile-description').text().trim()
+	obj.followers = $('div.content-title').find('span.followed_by').text()
+	obj.following = $('div.content-title').find('span.follows').text()
+	obj.post = arr
+	return obj
 }
 
 async function nhentaiScraper(id) {
