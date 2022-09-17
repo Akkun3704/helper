@@ -12,6 +12,8 @@
     "cheerio": "^1.0.0-rc.12",
     "express": "^4.18.1",
     "fs": "^0.0.1-security",
+    "fake-ua": "^1.0.4",
+    "get-stream": "^6.0.1",
     "morgan": "^1.10.0",
     "pdfkit": "^0.13.0"
   }
