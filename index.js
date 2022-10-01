@@ -253,7 +253,9 @@ async function igStalk(user) {
 	let html = (await axios.get('https://www.picuki.com/profile/' + user, { headers: { 'Referer': 'https://www.picuki.com/', 'User-Agent': fakeua.mobile() }})).data
 	let $ = cheerio.load(html), obj = {}, arr = []
 	let urlPost = $('div.content > ul > li').get().map((x) => $(x).find('a').attr('href'))
-	for (let x of urlPost) arr.push(await getDetailPost(x))
+	for (let x of urlPost) {
+		if (x) arr.push(await getDetailPost(x))
+	}
 	obj.avatar = $('div.profile-avatar').find('a').attr('href')
 	obj.username = $('div.profile-name > h1').text()
 	obj.fullname = $('div.profile-name > h2').text()
