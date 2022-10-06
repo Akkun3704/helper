@@ -1,4 +1,5 @@
 const fs = require('fs')
+const os = require('os')
 const path = require('path')
 const axios = require('axios')
 const morgan = require('morgan')
@@ -8,7 +9,7 @@ const express = require('express')
 const PDFDocument = require('pdfkit')
 const getStream = require('get-stream')
 
-const tmpFolder = path.join(__dirname, './tmp')
+const tmpFolder = os.tmpdir() // path.join(__dirname, './tmp')
 const PORT = process.env.PORT || ~~(Math.random() * 1e4)
 const app = express()
 
