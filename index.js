@@ -44,7 +44,7 @@ app.get('/', (req, res) => {
 				fetch: `${baseUrl}/fetch?url=${baseUrl}`,
 				igstalk: `${baseUrl}/igstalk?user=otaku_anime_indonesia`,
 				ssweb: `${baseUrl}/ss?url=${baseUrl}&full=false&type=desktop`
-			}
+			},
 			tiktok: {
 				latest_video: `${baseUrl}/tiktok/video/latest`,
 				popular_video: `${baseUrl}/tiktok/video/popular`,
