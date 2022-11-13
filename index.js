@@ -46,9 +46,9 @@ app.get('/', (req, res) => {
 				ssweb: `${baseUrl}/ss?url=${baseUrl}&full=false&type=desktop`
 			},
 			tiktok: {
-				latest_video: `${baseUrl}/tiktok/video/latest`,
-				popular_video: `${baseUrl}/tiktok/video/popular`,
-				trending_video: `${baseUrl}/tiktok/video/trending`,
+				latest_video: `${baseUrl}/tiktok/latest_video`,
+				popular_video: `${baseUrl}/tiktok/popular_video`,
+				trending_video: `${baseUrl}/tiktok/trending_video`,
 				stalk: `${baseUrl}/tiktok/stalk?user=js_bits`
 			}
 		}
@@ -117,13 +117,13 @@ app.get('/igstalk', async (req, res) => {
 
 app.get('/tiktok/:type', async (req, res) => {
 	try {
-		if (/^video\/latest$/i.test(req.params.type)) {
+		if (/^latest_video$/i.test(req.params.type)) {
 			let result = await urlebird.latest()
 			return res.json({ result })
-		} else if (/^video\/popular$/i.test(req.params.type)) {
+		} else if (/^popular_video$/i.test(req.params.type)) {
 			let result = await urlebird.popular()
 			return res.json({ result })
-		} else if (/^video\/trending$/i.test(req.params.type)) {
+		} else if (/^trending_video$/i.test(req.params.type)) {
 			let result = await urlebird.trending()
 			return res.json({ result })
 		} else if (/^stalk$/i.test(req.params.type)) {
