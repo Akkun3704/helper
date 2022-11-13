@@ -9,6 +9,7 @@ const express = require('express')
 const PDFDocument = require('pdfkit')
 const getStream = require('get-stream')
 
+const urlebird = require('./lib/urlebird.js')
 const tmpFolder = os.tmpdir() // path.join(__dirname, './tmp')
 const PORT = process.env.PORT || ~~(Math.random() * 1e4)
 const app = express()
@@ -43,6 +44,12 @@ app.get('/', (req, res) => {
 				fetch: `${baseUrl}/fetch?url=${baseUrl}`,
 				igstalk: `${baseUrl}/igstalk?user=otaku_anime_indonesia`,
 				ssweb: `${baseUrl}/ss?url=${baseUrl}&full=false&type=desktop`
+			}
+			tiktok: {
+				latest_video: `${baseUrl}/tiktok/video/latest`,
+				popular_video: `${baseUrl}/tiktok/video/popular`,
+				trending_video: `${baseUrl}/tiktok/video/trending`,
+				stalk: `${baseUrl}/tiktok/stalk?user=js_bits`
 			}
 		}
 	})
@@ -103,6 +110,27 @@ app.get('/igstalk', async (req, res) => {
 		if (!req.query.user) return res.json({ message: 'Required an username' })
 		let result = await igStalk(req.query.user)
 		res.json({ result })
+	} catch (e) {
+		res.send(e)
+	}
+})
+
+app.get('/tiktok/:type', async (req, res) => {
+	try {
+		if (/^video\/latest$/i.test(req.params.type)) {
+			let result = await urlebird.latest()
+			return res.json({ result })
+		} else if (/^video\/popular$/i.test(req.params.type)) {
+			let result = await urlebird.popular()
+			return res.json({ result })
+		} else if (/^video\/trending$/i.test(req.params.type)) {
+			let result = await urlebird.trending()
+			return res.json({ result })
+		} else if (/^stalk$/i.test(req.params.type)) {
+			if (!req.query.user) return res.json({ message: 'Required an username' })
+			let result = await urlebird.user(req.query.user)
+			return res.json({ result })
+		}
 	} catch (e) {
 		res.send(e)
 	}
